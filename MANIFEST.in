@@ -1,0 +1,5 @@
+prune native
+prune runs
+prune tests
+include README.md
+recursive-include ui *.html *.css *.js

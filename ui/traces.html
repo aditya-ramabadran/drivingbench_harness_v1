@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>DrivingBench Trace Viewer</title>
+    <link rel="stylesheet" href="/assets/style.css" />
+    <script src="/assets/traces.js" defer></script>
+  </head>
+  <body>
+    <main class="viewer">
+      <header>
+        <div>
+          <p class="eyebrow">DRIVINGBENCH SANDBOX</p>
+          <h1>Trace viewer</h1>
+          <p id="viewer-summary" class="lede">Published segments and labeled sessions from this checkout's traces/.</p>
+        </div>
+        <div class="header-actions"><a class="button-link" href="/">Master UI</a></div>
+      </header>
+      <section id="picker" class="card">
+        <h2>Segments</h2>
+        <p class="quiet">Newest first. A labeled session groups the segments of one benchmark attempt.</p>
+        <table id="segment-table" class="segment-table"><thead><tr><th>Started (UTC)</th><th>Segment</th><th>Session</th><th>Model · harness · outcome</th><th>Tool calls</th><th>Chat</th></tr></thead><tbody></tbody></table>
+      </section>
+      <section id="player" class="card" hidden>
+        <div class="section-heading">
+          <h2 id="player-title">Segment</h2>
+          <a id="player-back" href="/traces">All segments</a>
+        </div>
+        <p id="player-meta" class="quiet"></p>
+        <div class="player-grid">
+          <figure class="frame">
+            <img id="frame" alt="Observed frame at the scrubber time" />
+            <figcaption id="frame-caption" class="quiet">No observation yet at this time.</figcaption>
+            <div class="scrubber">
+              <button id="play" type="button" class="primary">Play</button>
+              <select id="rate" aria-label="Playback speed"><option value="1">1×</option><option value="2">2×</option><option value="3" selected>3×</option><option value="5">5×</option><option value="10">10×</option></select>
+              <div class="track">
+                <div id="markers" class="markers"></div>
+                <input id="scrub" type="range" min="0" max="1000" value="0" step="1" aria-label="Scrub through the segment" />
+              </div>
+              <span id="duration" class="quiet"></span>
+            </div>
+          </figure>
+          <aside>
+            <dl class="drive-measurements viewer-measurements">
+              <div><dt>Time</dt><dd id="v-time">0.0 s</dd></div>
+              <div><dt>Speed</dt><dd id="v-speed">—</dd></div>
+              <div><dt>Steering</dt><dd id="v-steering">—</dd></div>
+              <div><dt>Command</dt><dd id="v-command">—</dd></div>
+            </dl>
+            <canvas id="telemetry" width="560" height="140" aria-label="Speed and steering over time"></canvas>
+            <p class="quiet"><span class="swatch speed"></span> speed m/s <span class="swatch steering"></span> steering-wheel degrees</p>
+          </aside>
+        </div>
+        <h3>Tool calls</h3>
+        <ol id="calls" class="calls"></ol>
+      </section>
+    </main>
+  </body>
+</html>

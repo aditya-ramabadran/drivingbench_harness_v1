@@ -1,0 +1,11 @@
+{
+  "repository": "https://github.com/commaai/openpilot",
+  "version": "openpilot v0.11.2",
+  "branch": "release-mici-staging",
+  "commit": "76a7f8573d5e603b9458a3a71b73fa67ab242cee",
+  "license": "native/LICENSE",
+  "files": [
+    "openpilot/selfdrive/controls/controlsd.py",
+    "openpilot/selfdrive/controls/lib/drive_helpers.py"
+  ]
+}

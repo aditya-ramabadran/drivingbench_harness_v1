@@ -1,0 +1,18 @@
+{
+  "settings": {
+    "max_steering_angle_deg": 180,
+    "speed_limit_mps": 3.0,
+    "road_camera_mode": "narrow_only",
+    "image_adjustments": {"exposure_ev": 0, "contrast": 1, "saturation": 1},
+    "speed_control": {
+      "gain": 0.5,
+      "max_accel_mps2": 1.0,
+      "max_decel_mps2": 2.0,
+      "accel_slew_mps3": 1.0,
+      "target_rate_feedforward": 0,
+      "acceleration_damping_s": 1.0
+    },
+    "objective": "Follow the operator-designated course and stop at the destination.",
+    "prompt": ""
+  }
+}
