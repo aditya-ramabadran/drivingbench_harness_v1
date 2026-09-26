@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>DrivingBench Sandbox Master UI</title>
+    <link rel="stylesheet" href="/assets/style.css" />
+    <script src="/assets/prompt.js" defer></script>
+    <script src="/assets/app.js" defer></script>
+    <script src="/assets/drive.js" defer></script>
+  </head>
+  <body>
+    <main>
+      <header>
+        <div>
+          <p class="eyebrow">DRIVINGBENCH SANDBOX</p>
+          <h1>DrivingBench Sandbox Master UI</h1>
+          <p id="summary" class="lede">Connecting to the comma…</p>
+        </div>
+        <div class="header-actions">
+          <button id="stop" class="danger" type="button">Stop</button>
+          <span id="last-seen" class="quiet">No status received</span>
+          <a class="quiet" href="/traces">Trace viewer</a>
+        </div>
+      </header>
+      <nav class="workspace-nav" role="tablist" aria-label="Workspace">
+        <button id="setup-tab" type="button" role="tab" aria-controls="setup-panel" aria-selected="true">Setup</button>
+        <button id="drive-tab" type="button" role="tab" aria-controls="drive-panel" aria-selected="false" tabindex="-1">Drive</button>
+      </nav>
+      <p id="notice" class="notice" role="status" aria-live="polite">Loading status…</p>
+      <p id="operation-result" class="operation-result" role="status" aria-live="assertive" hidden></p>
+
+      <section class="card" aria-labelledby="control-title">
+        <h2 id="control-title">Connected control</h2>
+        <p>DrivingBench is always active · <span id="engagement">Unknown</span></p>
+        <p class="quiet">Any connected chat can send the next command. Commands replace globally; they do not queue. Stop cancels the command and brakes. A fresh command is required to resume.</p>
+      </section>
+
+      <div id="setup-panel" role="tabpanel" aria-labelledby="setup-tab">
+        <section class="card" aria-labelledby="online-title">
+          <h2 id="online-title">1. Bring the comma online</h2>
+          <p class="quiet">Connect this laptop and the comma to the same network, then connect to the installed producer.</p>
+          <button id="online" class="primary" type="button">Bring online</button>
+        </section>
+        <section class="card" aria-labelledby="clients-title">
+          <h2 id="clients-title">2. Check your chat app</h2>
+          <p class="quiet">Enable <code>drivingbench_sandbox</code> in Codex, Claude or Cursor. Restart the app after installation or an update.</p>
+          <ul id="client-status"><li>Checking installed clients…</li></ul>
+          <button id="refresh-status" type="button">Check connection and apps</button>
+        </section>
+        <section class="card" aria-labelledby="inputs-title">
+          <h2 id="inputs-title">3. Choose shared settings</h2>
+          <p id="settings-revision" class="quiet">Waiting for saved settings.</p>
+          <div class="input-grid">
+            <label>Model cameras<select id="road_camera_mode" disabled><option value="narrow_only">Narrow only</option><option value="narrow_and_wide">Narrow + wide</option><option value="wide_only">Wide only</option></select></label>
+            <label>Image preset<select id="image-preset" disabled><option value="neutral">Default · neutral</option><option value="night">Night</option><option value="custom" disabled>Custom values</option></select></label>
+          </div>
+          <div class="input-grid sliders">
+            <label><span>Exposure <output id="exposure_ev-value">0</output> EV</span><input id="exposure_ev" type="range" min="-2" max="3" step="0.1" disabled /></label>
+            <label><span>Contrast <output id="contrast-value">1</output>×</span><input id="contrast" type="range" min="0.5" max="2" step="0.01" disabled /></label>
+            <label><span>Saturation <output id="saturation-value">1</output>×</span><input id="saturation" type="range" min="0" max="2" step="0.01" disabled /></label>
+          </div>
+          <figure id="adjust-preview" class="adjust-preview" hidden>
+            <img id="adjust-preview-image" alt="Last narrow camera frame with the adjustments you are choosing" />
+            <figcaption class="quiet">Preview of the last narrow frame with these adjustments; hides after 10 s of no slider movement.</figcaption>
+          </figure>
+          <div class="input-grid">
+            <label>Steering scale (steering-wheel degrees at 100%)<input id="max_steering_angle_deg" type="number" min="0.1" step="any" disabled /></label>
+            <label>Speed ceiling (m/s, 0.5–3.5)<input id="speed_limit_mps" type="number" min="0.5" max="3.5" step="any" disabled /></label>
+          </div>
+          <p class="quiet">Saved changes sync to every laptop. Image adjustments apply to the model and Drive cameras. Steering and speed changes apply to the next command; the car's native limits still apply.</p>
+          <div class="action-row">
+            <button id="save-settings" type="button" disabled>Save settings</button>
+            <button id="reset-settings" type="button" disabled>Reset changes</button>
+          </div>
+        </section>
+        <section class="card" aria-labelledby="readiness-title">
+          <h2 id="readiness-title">4. Check vehicle readiness</h2>
+          <ul id="readiness-checklist"><li>Waiting for vehicle telemetry.</li></ul>
+          <p id="readiness-instruction">Waiting for vehicle telemetry.</p>
+          <p class="quiet">Press SET while holding the brake. Release the brake when ready, and press RES if the car asks when motion is sent.</p>
+        </section>
+        <section class="card" aria-labelledby="session-title">
+          <h2 id="session-title">5. Labeled session (optional)</h2>
+          <p class="quiet">Unlabeled driving is recorded as segments anyway. Start a session to group the next segments under a model and harness for the benchmark; end it with an outcome. Starting another session ends the current one.</p>
+          <div id="session-form" class="input-grid">
+            <label>Model<input id="session-model" type="text" maxlength="80" placeholder="exact model name" /></label>
+            <label>Harness<select id="session-harness"><option value="codex">Codex</option><option value="claude">Claude Code</option><option value="cursor">Cursor</option><option value="other">Other</option></select></label>
+            <label>Notes<input id="session-notes" type="text" maxlength="200" placeholder="lot A, left loop, try 3" /></label>
+          </div>
+          <div id="session-open" hidden>
+            <p id="session-current" class="session-current"></p>
+            <div class="input-grid">
+              <label>Outcome<select id="session-outcome"><option value="completed">Completed</option><option value="collision">Collision</option><option value="aborted">Aborted</option></select></label>
+              <label>Note<input id="session-note" type="text" maxlength="200" placeholder="optional" /></label>
+            </div>
+          </div>
+          <div class="action-row">
+            <button id="session-start" class="primary" type="button" disabled>Start session</button>
+            <button id="session-end" type="button" hidden>End session</button>
+          </div>
+        </section>
+        <section class="card" aria-labelledby="task-title">
+          <h2 id="task-title">6. Optional prompt builder</h2>
+          <p class="quiet">Any chat with the MCP tools can drive; no attach step is needed. The prompt is generated from the saved objective and car settings and does not bind a chat.</p>
+          <label>Objective<textarea id="objective" rows="3" disabled></textarea></label>
+          <div class="draft-options">
+            <button id="generate-prompt" type="button" disabled>Create prompt from saved settings</button>
+          </div>
+          <label>Prompt<textarea id="prompt" rows="12" disabled></textarea></label>
+          <div class="action-row">
+            <button id="save-task" type="button" disabled>Save task</button>
+            <button id="reset-task" type="button" disabled>Reset changes</button>
+            <button id="copy-prompt" type="button" disabled>Copy prompt</button>
+          </div>
+          <p class="quiet">Save shares your task with other laptops. Copy includes your unsaved prompt edits.</p>
+          <div class="input-grid canned">
+            <label>Reflection prompt<textarea id="reflection-prompt" rows="4" readonly>Your previous attempt has now ended (likely due to a mistake or collision with an object or the environment). Reflect on how you did in your previous attempt, why it might have ended, and what you can do better in a future attempt.</textarea><button id="copy-reflection" type="button">Copy</button></label>
+            <label>Continuation prompt<textarea id="continuation-prompt" rows="4" readonly>You now have been granted another attempt to complete the same objective as before. Begin now.</textarea><button id="copy-continuation" type="button">Copy</button></label>
+          </div>
+        </section>
+      </div>
+
+      <div id="drive-panel" role="tabpanel" aria-labelledby="drive-tab" hidden>
+        <section class="card" aria-labelledby="live-title">
+          <h2 id="live-title">Live operator view</h2>
+          <p id="drive-notice" class="quiet">Waiting for vehicle telemetry.</p>
+          <p class="quiet">Both cameras use the saved image adjustments. The model camera selection only controls which cameras observe returns.</p>
+          <div class="camera-grid">
+            <article><h3>Narrow camera</h3><p id="drive-narrow-status">Waiting for an image.</p><img id="drive-narrow-image" alt="Narrow camera" hidden /></article>
+            <article><h3>Wide camera</h3><p id="drive-wide-status">Waiting for an image.</p><img id="drive-wide-image" alt="Wide camera" hidden /></article>
+          </div>
+          <dl class="drive-measurements">
+            <div><dt>Speed</dt><dd id="drive-speed">Unknown</dd></div>
+            <div><dt>Steering (positive left)</dt><dd id="drive-steering">Unknown</dd></div>
+            <div><dt>Verified hold</dt><dd id="drive-hold">Unknown</dd></div>
+            <div><dt>Current command</dt><dd id="drive-command">Unknown</dd></div>
+          </dl>
+        </section>
+        <section class="card" aria-labelledby="history-title">
+          <h2 id="history-title">Tool-call history</h2>
+          <p id="history-notice" class="quiet">Shared calls from all connected chats. Images in recorded calls are past observations.</p>
+          <div id="history-calls"></div>
+        </section>
+      </div>
+    </main>
+  </body>
+</html>
